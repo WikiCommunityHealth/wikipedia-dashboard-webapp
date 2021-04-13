@@ -1,7 +1,8 @@
 FROM node:lts-alpine
 WORKDIR /webapp
-COPY . .
+COPY package*.json .
 RUN npm install
+COPY . .
 RUN rm -rf dist && \
     npm run build && \
     rm -r node_modules src
