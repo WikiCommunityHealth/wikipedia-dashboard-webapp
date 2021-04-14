@@ -1,6 +1,6 @@
 FROM node:lts-alpine
 WORKDIR /webapp
-COPY package*.json .
+COPY package*.json ./
 RUN npm install
 COPY . .
 RUN rm -rf dist && \
