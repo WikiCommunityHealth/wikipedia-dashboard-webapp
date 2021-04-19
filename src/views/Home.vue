@@ -1,31 +1,48 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
-  </div>
+  <div v-if="loading">Loading...</div>
+
+  <ul v-else-if="result && result.allPosts">
+    <li v-for="p of result.allPosts" :key="p.id">
+      {{ p.title }}
+    </li>
+  </ul>
+</div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import { gql } from 'graphql-tag';
 import { useQuery } from '@vue/apollo-composable';
 
 export default defineComponent({
   name: 'Home',
   components: {
-    HelloWorld,
+  },
+  data: function() {
+    return {
+      lista: []
+    }
   },
   setup() {
-    const { result, error } = useQuery(gql`
-    query abc {
-      allPosts {
-        id
+    const { result, loading } = useQuery(gql`
+      query abc {
+        allPosts {
+          id,
+          title
+        }
       }
-    }
     `);
-    console.log(result);
-    console.log(error);
+
+    setTimeout(() => {
+      result.value  = null;
+    }, 1000)
+
+    return {
+      result,
+      loading,
+    }
   },
 });
 </script>
