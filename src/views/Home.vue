@@ -1,48 +1,74 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-  <div v-if="loading">Loading...</div>
-
-  <ul v-else-if="result && result.allPosts">
-    <li v-for="p of result.allPosts" :key="p.id">
-      {{ p.title }}
-    </li>
-  </ul>
-</div>
+  <LineChart :data="data" />
+  <div v-if="query.loading">Loading...</div>
+  <div v-else-if="data">
+    <LineChart :data="data" />
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { gql } from 'graphql-tag';
-import { useQuery } from '@vue/apollo-composable';
+import { defineComponent, queuePostFlushCb } from "vue";
+import { gql } from "graphql-tag";
+import { useQuery } from "@vue/apollo-composable";
+import * as Plotly from "plotly.js";
+import LineChart from "../components/LineChart.vue";
 
 export default defineComponent({
-  name: 'Home',
+  name: "Home",
   components: {
+    LineChart,
   },
-  data: function() {
+  data: function () {
     return {
-      lista: []
-    }
+      data: null as Plotly.Data[] | null,
+    };
+  },
+  mounted() {
+    let xs = [] as number[];
+    let ys = [] as number[];
+    this.query.onResult((res) => {
+      xs = res.data.allTestdata.map((d: any) => +d.id) as number[];
+      ys = res.data.allTestdata.map((d: any) => +d.value) as number[];
+      this.data = [
+        {
+          name: "pippo",
+          x: xs,
+          y: ys,
+        },
+      ];
+    });
+
+    setInterval(() => {
+      this.data = [
+        {
+          name: "pippo",
+          x: xs,
+          y: ys.sort(() => Math.random() - 0.5),
+        },
+      ];
+    }, 3000);
   },
   setup() {
-    const { result, loading } = useQuery(gql`
+    const query = useQuery(gql`
       query abc {
-        allPosts {
-          id,
-          title
+        allTestdata {
+          id
+          value
         }
       }
     `);
 
-    setTimeout(() => {
-      result.value  = null;
-    }, 1000)
-
     return {
-      result,
-      loading,
-    }
+      query: query,
+    };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+#test-char {
+  height: 600px;
+  width: 90vw;
+  margin: 5vw;
+}
+</style>
