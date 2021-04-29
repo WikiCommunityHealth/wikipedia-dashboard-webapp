@@ -1,6 +1,5 @@
 <template>
-  <p>Ciao da linechart</p>
-  <div id="linechart"></div>
+  <div :id="id"></div>
 </template>
 
 <script lang="ts">
@@ -16,12 +15,12 @@ export default defineComponent({
   },
   props: {
     data: Array,
+    id: { type: String, required: true }
   },
   watch: {
     data(newData) {
       if (newData) {
-        console.log(newData);
-        Plotly.newPlot("linechart", this.data as Plotly.Data[]).then((g) => {
+        Plotly.newPlot(this.id, newData as Plotly.Data[]).then((g) => {
           this.graph = g;
         });
       }

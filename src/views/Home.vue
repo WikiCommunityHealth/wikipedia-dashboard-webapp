@@ -1,16 +1,11 @@
 <template>
-  <LineChart :data="data" />
-  <div v-if="query.loading">Loading...</div>
-  <div v-else-if="data">
-    <LineChart :data="data" />
-  </div>
+  <LineChart :data="dataset" :id="'linechart1'" />
 </template>
 
 <script lang="ts">
-import { defineComponent, queuePostFlushCb } from "vue";
-import { gql } from "graphql-tag";
-import { useQuery } from "@vue/apollo-composable";
-import * as Plotly from "plotly.js";
+import { defineComponent } from "vue";
+import * as Queries from "@/utils/apollo/queries";
+import { Data } from "plotly.js";
 import LineChart from "../components/LineChart.vue";
 
 export default defineComponent({
@@ -20,16 +15,17 @@ export default defineComponent({
   },
   data: function () {
     return {
-      data: null as Plotly.Data[] | null,
+      dataset: null as Data[] | null,
     };
   },
   mounted() {
     let xs = [] as number[];
     let ys = [] as number[];
+
     this.query.onResult((res) => {
-      xs = res.data.allTestdata.map((d: any) => +d.id) as number[];
-      ys = res.data.allTestdata.map((d: any) => +d.value) as number[];
-      this.data = [
+      xs = res.data.allTestdata.map(d => d.id ? +d.id : 0) as number[];
+      ys = res.data.allTestdata.map(d => d.value ? +d.value : 0) as number[];
+      this.dataset = [
         {
           name: "pippo",
           x: xs,
@@ -39,7 +35,7 @@ export default defineComponent({
     });
 
     setInterval(() => {
-      this.data = [
+      this.dataset = [
         {
           name: "pippo",
           x: xs,
@@ -49,17 +45,8 @@ export default defineComponent({
     }, 3000);
   },
   setup() {
-    const query = useQuery(gql`
-      query abc {
-        allTestdata {
-          id
-          value
-        }
-      }
-    `);
-
     return {
-      query: query,
+      query: Queries.getAllTestData()
     };
   },
 });
